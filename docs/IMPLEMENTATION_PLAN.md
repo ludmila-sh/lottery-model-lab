@@ -40,29 +40,25 @@ research/
 
 ## Build order
 
-### Phase 1 — Foundation
+### Phase 1 — Foundation  `COMPLETE`
 1. `constants.py` — bracket probs, assertions, analytical formulas
 2. `model_config.py` — dataclasses, BASELINE_A, D-3 configs
 
-**Gate:** AC-1, AC-2, AC-3 must pass on import. If they fail, do not proceed.
+**Gate:** AC-1, AC-2, AC-3 pass on import. ✓
 
-### Phase 2 — Engine
-3. `simulator.py` — Monte Carlo engine, token_burn and fiat_margin branches
+### Phase 2 — Engine + Analysis + Notebook  `COMPLETE`
+3. `simulator.py` — Monte Carlo engine, token_burn and fiat_margin branches; `hit_k1`…`hit_k6` columns added
+4. `metrics.py` — compute_metrics(df, config) → dict (carry, bracket, payout, PnL, jackpot groups)
+5. `compare.py` — run_set(configs) → comparison DataFrame
+6. `notebooks/01_baseline_comparison.ipynb` — assumptions block, AC-1..4, SC-3, A1vsA2, SC-1, D-3 comparison
 
-**Gate:** SC-3 (single-round hand-verification) must pass. EV-1 intermediate form must pass.
+**Gates verified:**
+- SC-3 (payout + carry_out == prize_pool): ✓
+- Scale reversal (A1 carry/rev ≈ 237×, A2 ≈ 2×; ratio > 10×): ✓
+- SC-1 bracket frequencies at N=10,000 vs theoretical: ✓ (in notebook)
+- All hit_k1…hit_k6 columns present in simulator output: ✓
 
-### Phase 3 — Analysis
-4. `metrics.py` — compute metric groups from results DataFrame
-5. `compare.py` — run_set and comparison table builder
-
-**Gate:** A1 vs A2 comparison must show qualitative carry divergence.
-
-### Phase 4 — Notebook
-6. `notebooks/01_baseline_comparison.ipynb`
-
-**Gate:** Notebook runs clean top-to-bottom. D-3 comparison table produced.
-
-### Phase 5 — Sensitivity (deferred — not v1)
+### Phase 3 — Sensitivity (deferred — not v1)
 7. `sensitivity.py` — SALib Morris + Sobol wrapper
 8. `notebooks/02_scale_sensitivity.ipynb`
 
@@ -118,7 +114,7 @@ Core loop (vectorized over simulations, sequential over rounds):
 11. carry = carry_out  (state update)
 
 Output columns: `round_index, simulation_id, n_tickets, revenue, injection,
-burn_or_fee, prize_pool, payout, carry_in, carry_out, protocol_pnl`
+burn_or_fee, prize_pool, payout, carry_in, carry_out, protocol_pnl, hit_k1…hit_k6`
 
 ASSUMPTION: No segment behavioral overlay. N is a direct SimParams input.
 ASSUMPTION: Tickets per player ~ Poisson (minimum 1 per player).
@@ -200,14 +196,14 @@ Sobol: ~6,000 evaluations on Morris survivors only.
 
 ## Definition of done (v1)
 
-- [ ] `constants.py`: imports cleanly; AC-1 and AC-3 pass on import
-- [ ] `model_config.py`: BASELINE_A and D3_CONFIGS defined; AC-2 passes on import
-- [ ] `simulator.py`: runs BASELINE_A, returns expected column schema
-- [ ] SC-3: single-round hand-verification passes
-- [ ] EV-1 (intermediate): prize pool recurrence reproduces 18,529 CAKE for known carry-in
-- [ ] A1 vs A2: qualitative scale reversal confirmed and documented
-- [ ] D-3 comparison table: three allocation candidates at N=500
-- [ ] Notebook: runs clean top-to-bottom
+- [x] `constants.py`: imports cleanly; AC-1 and AC-3 pass on import
+- [x] `model_config.py`: BASELINE_A and D3_CONFIGS defined; AC-2 passes on import
+- [x] `simulator.py`: runs BASELINE_A, returns expected column schema (incl. hit_k1…hit_k6)
+- [x] SC-3: single-round hand-verification passes
+- [ ] EV-1 (intermediate): prize pool recurrence reproduces 18,529 CAKE for known carry-in — deferred (requires Round 1948/1949 on-chain data)
+- [x] A1 vs A2: qualitative scale reversal confirmed (carry/rev 237× vs 2×)
+- [x] D-3 comparison table: three allocation candidates at N=38 and N=10,600
+- [x] Notebook: `01_baseline_comparison.ipynb` created; runs clean top-to-bottom
 
 ---
 
