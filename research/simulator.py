@@ -64,6 +64,7 @@ def simulate(config: RunConfig) -> pd.DataFrame:
     col_carry_in   = np.empty(n_rows, dtype=np.float64)
     col_carry_out  = np.empty(n_rows, dtype=np.float64)
     col_pnl        = np.empty(n_rows, dtype=np.float64)
+    col_hit_k      = [np.empty(n_rows, dtype=np.int8) for _ in range(6)]
 
     carry = np.zeros(sims, dtype=np.float64)  # global rollover state
 
@@ -141,6 +142,8 @@ def simulate(config: RunConfig) -> pd.DataFrame:
         col_carry_in[sl]   = carry_in
         col_carry_out[sl]  = carry_out
         col_pnl[sl]        = pnl
+        for k in range(6):
+            col_hit_k[k][sl] = hits[k]
 
     return pd.DataFrame({
         "round_index":    col_round,
@@ -154,4 +157,5 @@ def simulate(config: RunConfig) -> pd.DataFrame:
         "carry_in":       col_carry_in,
         "carry_out":      col_carry_out,
         "protocol_pnl":   col_pnl,
+        **{f"hit_k{k+1}": col_hit_k[k] for k in range(6)},
     })
